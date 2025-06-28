@@ -1,0 +1,102 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="imgui\imgui.cpp">
+      <Filter>imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui\imgui_demo.cpp">
+      <Filter>imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui\imgui_draw.cpp">
+      <Filter>imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui\imgui_impl_dx9.cpp">
+      <Filter>imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui\imgui_impl_win32.cpp">
+      <Filter>imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui\imgui_widgets.cpp">
+      <Filter>imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui\imgui_tables.cpp">
+      <Filter>imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="main\main.cpp">
+      <Filter>main</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="imgui\imconfig.h">
+      <Filter>imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui\imgui.h">
+      <Filter>imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui\imgui_impl_dx9.h">
+      <Filter>imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui\imgui_impl_win32.h">
+      <Filter>imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui\imgui_internal.h">
+      <Filter>imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui\imstb_rectpack.h">
+      <Filter>imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui\imstb_textedit.h">
+      <Filter>imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui\imstb_truetype.h">
+      <Filter>imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="kernel\coms.h">
+      <Filter>driver</Filter>
+    </ClInclude>
+    <ClInclude Include="kernel\spoof.h">
+      <Filter>driver</Filter>
+    </ClInclude>
+    <ClInclude Include="offsets SDK\offsets.h">
+      <Filter>updates</Filter>
+    </ClInclude>
+    <ClInclude Include="offsets SDK\sdk.h">
+      <Filter>updates</Filter>
+    </ClInclude>
+    <ClInclude Include="external\gui.h">
+      <Filter>external</Filter>
+    </ClInclude>
+    <ClInclude Include="external\input.h">
+      <Filter>external</Filter>
+    </ClInclude>
+    <ClInclude Include="main\main.h">
+      <Filter>main</Filter>
+    </ClInclude>
+    <ClInclude Include="settings\settings.h" />
+    <ClInclude Include="game\actorloop.h" />
+    <ClInclude Include="game\drawing.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Library Include="d3d9.lib" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="imgui">
+      <UniqueIdentifier>{3702487f-fea8-4052-964f-b93a30022a92}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="driver">
+      <UniqueIdentifier>{362f71d4-a98f-4723-bebd-6e01e790f0d9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="updates">
+      <UniqueIdentifier>{54fa1b46-f096-4c34-95ed-2ea7a2c9292f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="external">
+      <UniqueIdentifier>{d4f41ac8-5140-4a30-ae3f-6e812f24fb3a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="main">
+      <UniqueIdentifier>{63eafdd7-770a-42ad-bf06-5cc43690aeca}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <MASM Include="kernel\direct.asm" />
+  </ItemGroup>
+</Project>
