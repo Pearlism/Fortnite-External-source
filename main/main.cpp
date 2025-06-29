@@ -5,10 +5,7 @@
 #include <Windows.h>
 void main()
 {
-    std::cout << "[-] Driver failed to initialize.\n";
-
-    //uac::init();
-  //  user::init();
+    //std::cout << "[-] Driver failed to initialize.\n";
     if (!kernel->Init()) {
         std::cout << "[-] Driver failed to initialize.\n";
         std::cout << "[+] Attempting to load driver for you...\n";
@@ -43,9 +40,9 @@ void main()
     uac::init();
     user::init();
     overlay();  
-    std::thread(caching).detach(); // fic perforkanc ehere
+    std::thread(caching).detach(); 
 
-    std::thread(watchdog_thread).detach(); // fic perforkanc ehere
+    std::thread(watchdog_thread).detach(); 
 
     std::thread(world_reading_work).detach();
     directx_init();

@@ -138,6 +138,7 @@ void overlay()
 	UpdateWindow(hwnd_out);
 	MyWnd = hwnd_out;
 }
+int selected_tab = 0; // global / static inside
 void show_menu()
 {
 	char watermarkText[64];
@@ -148,32 +149,71 @@ void show_menu()
 	ImGui::GetForegroundDrawList()->AddRectFilled(rectPos, ImVec2(rectPos.x + rectSize.x, rectPos.y + rectSize.y), ImColor(10, 10, 10), 0, 0);
 	ImGui::GetForegroundDrawList()->AddRectFilled(rectPos, ImVec2(rectPos.x + rectSize.x, rectPos.y + 2), ImColor(0, 128, 255), 0, 0);
 	ImGui::GetForegroundDrawList()->AddText(ImGui::GetFont(), 14.0f, ImVec2(rectPos.x + (rectSize.x - wmTextSize.x) / 2, rectPos.y + (rectSize.y - wmTextSize.y) / 2), ImColor(255, 255, 255), watermarkText);
-	if (GetAsyncKeyState(VK_INSERT) & 1) get_menu = !get_menu;
+
+	if (GetAsyncKeyState(VK_INSERT) & 1)
+		get_menu = !get_menu;
+
 	if (get_menu)
 	{
-		ImGui::SetNextWindowSize({ 620, 350 });
-		ImGui::Begin("imgui menu", 0, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar);
-		ImGui::Checkbox("Enable Visuals", &settings::visuals::enable);
-		if (settings::visuals::enable)
+		ImGui::SetNextWindowSize({ 640, 400 });
+		ImGui::Begin("ImGui Menu", 0, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar);
+
+		const char* tabs[] = { "Visuals", "Aimbot", "Misc" }; // tab namess
+		int tab_count = IM_ARRAYSIZE(tabs);
+
+		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(10, 6));
+		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.10f, 0.10f, 0.10f, 0.78f));
+		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.00f, 0.50f, 1.00f, 0.60f));
+		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.00f, 0.50f, 1.00f, 1.00f));
+
+		for (int i = 0; i < tab_count; i++)
 		{
-			ImGui::Checkbox("Name", &settings::visuals::name);
-			ImGui::Checkbox("selfesp", &settings::visuals::selfesp);
-			ImGui::Checkbox("Platform", &settings::visuals::platform);
-			ImGui::Checkbox("Distance", &settings::visuals::distance);
-			ImGui::Checkbox("Rank", &settings::visuals::rank);
-			ImGui::Checkbox("Skeleton", &settings::visuals::skeleton);
-			ImGui::Checkbox("debug", &settings::visuals::debug);
-			ImGui::Checkbox("Box", &settings::visuals::box);
-			ImGui::SliderFloat("Render Distance", &settings::visuals::renderDistance, 100, 1000, "%.fm");
-			if (ImGui::BeginCombo("Box Type", getBoxTypeName(settings::visuals::boxType)))
+			if (i > 0) ImGui::SameLine();
+			if (ImGui::Button(tabs[i], ImVec2(100, 30)))
+				selected_tab = i;
+		}
+
+		ImGui::PopStyleColor(3);
+		ImGui::PopStyleVar();
+
+		ImGui::Spacing();
+		ImGui::Separator();
+		ImGui::Spacing();
+
+		if (selected_tab == 0) // tab 1 / visuals
+		{
+			ImGui::Checkbox("Enable Visuals", &settings::visuals::enable);
+			if (settings::visuals::enable)
 			{
-				for (auto boxType : boxValues)
+				ImGui::Checkbox("Name", &settings::visuals::name);
+				ImGui::Checkbox("selfesp", &settings::visuals::selfesp);
+				ImGui::Checkbox("Platform", &settings::visuals::platform);
+				ImGui::Checkbox("Distance", &settings::visuals::distance);
+				ImGui::Checkbox("Rank", &settings::visuals::rank);
+				ImGui::Checkbox("Skeleton", &settings::visuals::skeleton);
+				ImGui::Checkbox("Box", &settings::visuals::box);
+				if (ImGui::BeginCombo("Box Type", getBoxTypeName(settings::visuals::boxType)))
 				{
-					if (ImGui::Selectable(getBoxTypeName(boxType), settings::visuals::boxType == boxType)) settings::visuals::boxType = boxType;
+					for (auto boxType : boxValues)
+					{
+						if (ImGui::Selectable(getBoxTypeName(boxType), settings::visuals::boxType == boxType))
+							settings::visuals::boxType = boxType;
+					}
+					ImGui::EndCombo();
 				}
 			}
-			ImGui::EndCombo();
 		}
+		else if (selected_tab == 1) // tab 2 / aimbot
+		{
+			// add aimbot or wtv you want or change doesnt matter, i just dont feel like doing it, maybe in another update i will
+		}
+		else if (selected_tab == 2) // tab 3 / misc
+		{
+			ImGui::Checkbox("debug", &settings::visuals::debug);
+			ImGui::Checkbox("Loot Esp", &settings::visuals::worldesp);
+			ImGui::SliderFloat("Render Distance", &settings::visuals::renderDistance, 100, 1000, "%.fm");
+		}
+
 		ImGui::End();
 	}
 }
@@ -251,7 +291,7 @@ WPARAM RenderLoop()
 		ImGui_ImplWin32_NewFrame();
 		ImGui::NewFrame();
 		actor();
-		world_esp();
+		//world_esp();
 		show_menu();
 		ImGui::EndFrame();
 		p_device->SetRenderState(D3DRS_ZENABLE, false);

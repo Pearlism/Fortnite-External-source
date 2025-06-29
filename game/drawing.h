@@ -46,6 +46,28 @@ static void drawcornerbox(float x, float y, float w, float h, ImColor color)
 	ImGui::GetForegroundDrawList()->AddLine(ImVec2(x + w - (w / 3), y + h), ImVec2(x + w, y + h), color, 1.0f);
 	ImGui::GetForegroundDrawList()->AddLine(ImVec2(x + w, y + h - (h / 3)), ImVec2(x + w, y + h), color, 1.0f);
 }
+void DrawBezier(ImVec2 p0, ImVec2 p1, ImVec2 p2, ImVec2 p3, ImU32 color, float thickness, int segments = 20) {
+	std::vector<ImVec2> points;
+	for (int i = 0; i <= segments; ++i) {
+		float t = (float)i / (float)segments;
+		float u = 1.0f - t;
+
+		float x = u * u * u * p0.x +
+			3 * u * u * t * p1.x +
+			3 * u * t * t * p2.x +
+			t * t * t * p3.x;
+
+		float y = u * u * u * p0.y +
+			3 * u * u * t * p1.y +
+			3 * u * t * t * p2.y +
+			t * t * t * p3.y;
+
+		points.push_back(ImVec2(x, y));
+	}
+	ImGui::GetForegroundDrawList()->AddPolyline(points.data(), points.size(), color, false, thickness);
+}
+
+
 
 namespace updater {
 

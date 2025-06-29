@@ -161,12 +161,6 @@ void caching( )
 			if (pawn_private == cache::local_pawn && !settings::visuals::selfesp) continue;
 			uintptr_t mesh = read<uintptr_t>(pawn_private + MESH);
 			if (!mesh) continue;
-			/*Vector3 head3d = get_entity_bone(mesh, 110);
-			Vector2 head2d = project_world_to_screen(Vector3(head3d.x, head3d.y, head3d.z + 15));
-			Vector3 bottom3d = get_entity_bone(mesh, 0);
-			Vector2 bottom2d = project_world_to_screen(bottom3d);*/
-			/*float box_height = abs(head2d.y - bottom2d.y);
-			float box_width = box_height * 0.30f;*/
 			uintptr_t actorRootComponent = read<uintptr_t>(pawn_private + ROOT_COMPONENT);
 			Vector3 actorRelativeLocation = read<Vector3>(actorRootComponent + RELATIVE_LOCATION);
 
@@ -178,13 +172,9 @@ void caching( )
 			entity.location = actorRelativeLocation;
 			entity.player_state = player_state;
 			templist.push_back(entity);
-			//float distance = cache::localRelativeLocation.distance(actorRelativeLocation) / 100.0f;
+			
 		}
 		EntityListA.swap(templist);
-		/*{
-			std::unique_lock lock(EntityListMutex);
-			std::swap(EntityListA, templist);
-		}*/
 		std::this_thread::sleep_for(std::chrono::milliseconds(5));
 	}
 }
@@ -311,31 +301,40 @@ void actor()
 				get_entity_bone(mesh, 82),  // right foot
 				get_entity_bone(mesh, 67)   // head
 			};
+
 			std::vector<Vector2> screenPositions(bones.size());
 			for (size_t i = 0; i < bones.size(); ++i) {
 				screenPositions[i] = project_world_to_screen(bones[i]);
 			}
+
 			ImU32 color = is_visible(mesh) ? settings::colors::icSkeletonColorVisible : settings::colors::icSkeletonColorInvisible;
-			ImU32 outline = IM_COL32(0, 0, 0, 255); //outline col
-			auto draw_line = [&](int idx1, int idx2) {
+			ImU32 outline = IM_COL32(0, 0, 0, 255); // outline color
+
+			auto draw_curved_line = [&](int idx1, int idx2) {
 				ImVec2 p1(screenPositions[idx1].x, screenPositions[idx1].y);
 				ImVec2 p2(screenPositions[idx2].x, screenPositions[idx2].y);
-				ImGui::GetForegroundDrawList()->AddLine(p1, p2, outline, 3.5f);
-				ImGui::GetForegroundDrawList()->AddLine(p1, p2, color, 2.0f);
+
+				ImVec2 center = ImVec2((p1.x + p2.x) / 2.0f, (p1.y + p2.y) / 2.0f - 10.0f);
+				ImVec2 cp1 = ImVec2((p1.x + center.x) / 2.0f, (p1.y + center.y) / 2.0f);
+				ImVec2 cp2 = ImVec2((p2.x + center.x) / 2.0f, (p2.y + center.y) / 2.0f);
+
+				DrawBezier(p1, cp1, cp2, p2, outline, 3.5f);
+				DrawBezier(p1, cp1, cp2, p2, color, 2.0f);
 				};
-			draw_line(1, 4);   
-			draw_line(1, 2);   
-			draw_line(2, 3);  
-			draw_line(4, 5);   
-			draw_line(5, 6);   
-			draw_line(0, 7);   
-			draw_line(7, 8);   
-			draw_line(8, 9);  
-			draw_line(9, 12);  
-			draw_line(7, 10);  
-			draw_line(10, 11); 
-			draw_line(11, 13); 
+			draw_curved_line(1, 4);    // neck to right shoulder
+			draw_curved_line(1, 2);    // neck to left shoulder
+			draw_curved_line(2, 3);    // left shoulder to left elbow
+			draw_curved_line(4, 5);    // right shoulder to right elbow
+			draw_curved_line(5, 6);    // right elbow to right hand
+			draw_curved_line(0, 7);    // head to pelvis
+			draw_curved_line(7, 8);    // pelvis to left hip
+			draw_curved_line(8, 9);    // left hip to left knee
+			draw_curved_line(9, 12);   // left knee to left foot
+			draw_curved_line(7, 10);   // pelvis to right hip
+			draw_curved_line(10, 11);  // right hip to right knee
+			draw_curved_line(11, 13);  // right knee to right foot
 		}
+
 		if (settings::visuals::debug)
 		{
 			char debugLines[5][128];
@@ -379,6 +378,10 @@ void actor()
 				);
 				y += textSizes[i].y + spacing;
 			}
+		}
+		if (settings::visuals::worldesp)
+		{
+			world_esp();
 		}
 		//more options
 	}

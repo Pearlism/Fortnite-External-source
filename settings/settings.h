@@ -46,6 +46,7 @@ namespace settings
         inline int boxType = boxType::normal;
         inline bool selfesp = false;
         inline bool debug = false;
+        inline bool worldesp = true;
 	}
     namespace colors
     {
