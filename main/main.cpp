@@ -37,8 +37,6 @@ void main()
         std::cout << "[-] loading CR3 Memory Class\n";
     }
     std::cout << "[+] CR3 is valid. Launching overlay.\n";
-    uac::init();
-    user::init();
     overlay();  
     std::thread(caching).detach(); 
 

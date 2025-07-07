@@ -11,11 +11,15 @@
 #include "../kernel/coms.h"
 #include "../Offsets SDK/offsets.h"
 #include <chrono>
+#include <string>
+#include "../freetype/include/freetype/freetype.h"
 #pragma comment(lib, "d3d9.lib")
 #include <dwmapi.h>
 #include <windows.h>
 #include <psapi.h>
 #include <string>
+#include "fonts.hxx"
+#include "../imgui/imgui_freetype.h"
 #pragma comment(lib, "dwmapi.lib")
 #pragma comment(lib, "dwmapi.lib")
 IDirect3D9Ex* p_object = NULL;
@@ -40,6 +44,15 @@ int getFps()
 		last = now;
 	}
 	return fps;
+}
+namespace font
+{
+	inline ImFont* icomoon = nullptr;
+
+	inline ImFont* icomoon_widget = nullptr;
+	inline ImFont* icomoon_widget2 = nullptr;
+
+
 }
 HRESULT directx_init()
 {
@@ -67,8 +80,15 @@ HRESULT directx_init()
 	ImFontAtlas* fontAtlas = io.Fonts;
 	ImFontConfig arialConfig;
 	arialConfig.FontDataOwnedByAtlas = false;
-	ImFont* arialFont = fontAtlas->AddFontFromFileTTF("c:\\Windows\\Fonts\\Bahnschrift.ttf", 14.0f, &arialConfig);
+	ImFont* arialFont = fontAtlas->AddFontFromFileTTF("C:\\Windows\\Fonts\\Bahnschrift.ttf", 14.0f, &arialConfig);
 	io.Fonts = fontAtlas;
+	ImFontConfig cfg;
+	cfg.FontBuilderFlags = ImGuiFreeTypeBuilderFlags_ForceAutoHint | ImGuiFreeTypeBuilderFlags_LightHinting | ImGuiFreeTypeBuilderFlags_LoadColor;
+	
+	// Load icon font with default glyph ranges
+	font::icomoon = io.Fonts->AddFontFromMemoryTTF(icomoon, sizeof(icomoon), 20.f, &cfg, io.Fonts->GetGlyphRangesDefault());
+	font::icomoon_widget = io.Fonts->AddFontFromMemoryTTF(icomoon_widget, sizeof(icomoon_widget), 15.f, &cfg, io.Fonts->GetGlyphRangesDefault());
+	font::icomoon_widget2 = io.Fonts->AddFontFromMemoryTTF(icomoon, sizeof(icomoon), 16.f, &cfg, io.Fonts->GetGlyphRangesDefault());
 	io.IniFilename = 0;
 	ImGuiStyle* style = &ImGui::GetStyle();
 	style->WindowTitleAlign = { 0.5f, 0.5f };
@@ -129,7 +149,7 @@ void overlay()
 	if (!find_discord_overlay_window(hwnd_out)) {
 		MessageBoxA(0, "Couldn't find Discord overlay window.", "Error", MB_ICONERROR);
 		return;
-	}
+	} 
 	MARGINS margin = { -1 };
 	DwmExtendFrameIntoClientArea(hwnd_out, &margin);
 	SetWindowLong(hwnd_out, GWL_EXSTYLE, GetWindowLong(hwnd_out, GWL_EXSTYLE) | WS_EX_LAYERED | WS_EX_TRANSPARENT | WS_EX_TOOLWINDOW);
@@ -138,17 +158,21 @@ void overlay()
 	UpdateWindow(hwnd_out);
 	MyWnd = hwnd_out;
 }
-int selected_tab = 0; // global / static inside
+int selected_tab = 0; 
 void show_menu()
 {
 	char watermarkText[64];
-	sprintf_s(watermarkText, "Landens Base | %.i FPS", getFps());
+	sprintf_s(watermarkText, "Landens Base | %i FPS", getFps());
 	ImVec2 wmTextSize = ImGui::CalcTextSize(watermarkText);
-	ImVec2 rectSize = ImVec2(wmTextSize.x + 2 * 10.0f, wmTextSize.y + 2 * 5.0f);
+	ImVec2 rectSize = ImVec2(wmTextSize.x + 20.0f, wmTextSize.y + 10.0f);
 	ImVec2 rectPos = ImVec2(5, 5);
-	ImGui::GetForegroundDrawList()->AddRectFilled(rectPos, ImVec2(rectPos.x + rectSize.x, rectPos.y + rectSize.y), ImColor(10, 10, 10), 0, 0);
-	ImGui::GetForegroundDrawList()->AddRectFilled(rectPos, ImVec2(rectPos.x + rectSize.x, rectPos.y + 2), ImColor(0, 128, 255), 0, 0);
-	ImGui::GetForegroundDrawList()->AddText(ImGui::GetFont(), 14.0f, ImVec2(rectPos.x + (rectSize.x - wmTextSize.x) / 2, rectPos.y + (rectSize.y - wmTextSize.y) / 2), ImColor(255, 255, 255), watermarkText);
+
+	auto draw = ImGui::GetForegroundDrawList();
+	draw->AddRectFilled(rectPos, ImVec2(rectPos.x + rectSize.x, rectPos.y + rectSize.y), ImColor(10, 10, 10));
+	draw->AddRectFilled(rectPos, ImVec2(rectPos.x + rectSize.x, rectPos.y + 2), ImColor(0, 128, 255));
+	draw->AddText(ImGui::GetFont(), 14.0f,
+		ImVec2(rectPos.x + (rectSize.x - wmTextSize.x) / 2, rectPos.y + (rectSize.y - wmTextSize.y) / 2),
+		ImColor(255, 255, 255), watermarkText);
 
 	if (GetAsyncKeyState(VK_INSERT) & 1)
 		get_menu = !get_menu;
@@ -158,19 +182,23 @@ void show_menu()
 		ImGui::SetNextWindowSize({ 640, 400 });
 		ImGui::Begin("ImGui Menu", 0, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar);
 
-		const char* tabs[] = { "Visuals", "Aimbot", "Misc" }; // tab namess
+		struct TabData { const char* icon; };
+		TabData tabs[] = { { "b" }, { "c" }, { "e" } };
 		int tab_count = IM_ARRAYSIZE(tabs);
 
 		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(10, 6));
-		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.10f, 0.10f, 0.10f, 0.78f));
-		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.00f, 0.50f, 1.00f, 0.60f));
-		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.00f, 0.50f, 1.00f, 1.00f));
+		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
+		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0, 0, 0, 0));
+		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0, 0, 0, 0));
 
 		for (int i = 0; i < tab_count; i++)
 		{
 			if (i > 0) ImGui::SameLine();
-			if (ImGui::Button(tabs[i], ImVec2(100, 30)))
+
+			ImGui::PushFont(font::icomoon);
+			if (ImGui::Button(tabs[i].icon, ImVec2(40, 30)))
 				selected_tab = i;
+			ImGui::PopFont();
 		}
 
 		ImGui::PopStyleColor(3);
@@ -180,18 +208,19 @@ void show_menu()
 		ImGui::Separator();
 		ImGui::Spacing();
 
-		if (selected_tab == 0) // tab 1 / visuals
+		if (selected_tab == 0)
 		{
 			ImGui::Checkbox("Enable Visuals", &settings::visuals::enable);
 			if (settings::visuals::enable)
 			{
 				ImGui::Checkbox("Name", &settings::visuals::name);
-				ImGui::Checkbox("selfesp", &settings::visuals::selfesp);
+				ImGui::Checkbox("Self ESP", &settings::visuals::selfesp);
 				ImGui::Checkbox("Platform", &settings::visuals::platform);
 				ImGui::Checkbox("Distance", &settings::visuals::distance);
 				ImGui::Checkbox("Rank", &settings::visuals::rank);
 				ImGui::Checkbox("Skeleton", &settings::visuals::skeleton);
 				ImGui::Checkbox("Box", &settings::visuals::box);
+
 				if (ImGui::BeginCombo("Box Type", getBoxTypeName(settings::visuals::boxType)))
 				{
 					for (auto boxType : boxValues)
@@ -203,17 +232,26 @@ void show_menu()
 				}
 			}
 		}
-		else if (selected_tab == 1) // tab 2 / aimbot
+		else if (selected_tab == 1)
+		{ 
+			//aimbot tab 
+		} 
+		else if (selected_tab == 2)
 		{
-			// add aimbot or wtv you want or change doesnt matter, i just dont feel like doing it, maybe in another update i will
+			ImGui::Checkbox("Debug", &settings::visuals::debug);
+			ImGui::Checkbox("Loot ESP", &settings::visuals::worldesp);
+			ImGui::SliderFloat("Render Distance", &settings::visuals::renderDistance, 100.0f, 1000.0f, "%.0fm");
+			ImGuiColorEditFlags flags = ImGuiColorEditFlags_AlphaBar | ImGuiColorEditFlags_AlphaPreview | ImGuiColorEditFlags_Float;
+			if (ImGui::ColorButton("##color", settings::colors::icBoxColorVisible, ImGuiColorEditFlags_NoTooltip, ImVec2(24, 24)))
+			{
+				ImGui::OpenPopup("color_picker_popup");
+			}
+			if (ImGui::BeginPopup("color_picker_popup"))
+			{
+				ImGui::ColorPicker4("##picker", (float*)&settings::colors::icBoxColorVisible.Value, flags);
+				ImGui::EndPopup();
+			}
 		}
-		else if (selected_tab == 2) // tab 3 / misc
-		{
-			ImGui::Checkbox("debug", &settings::visuals::debug);
-			ImGui::Checkbox("Loot Esp", &settings::visuals::worldesp);
-			ImGui::SliderFloat("Render Distance", &settings::visuals::renderDistance, 100, 1000, "%.fm");
-		}
-
 		ImGui::End();
 	}
 }
@@ -291,7 +329,6 @@ WPARAM RenderLoop()
 		ImGui_ImplWin32_NewFrame();
 		ImGui::NewFrame();
 		actor();
-		//world_esp();
 		show_menu();
 		ImGui::EndFrame();
 		p_device->SetRenderState(D3DRS_ZENABLE, false);
@@ -324,6 +361,3 @@ WPARAM RenderLoop()
 	DestroyWindow(MyWnd);
 	return messager.wParam;
 }
-
-
-

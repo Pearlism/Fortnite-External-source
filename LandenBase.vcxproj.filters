@@ -25,6 +25,7 @@
     <ClCompile Include="main\main.cpp">
       <Filter>main</Filter>
     </ClCompile>
+    <ClCompile Include="imgui\imgui_freetype.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="imgui\imconfig.h">
@@ -75,9 +76,10 @@
     <ClInclude Include="settings\settings.h" />
     <ClInclude Include="game\actorloop.h" />
     <ClInclude Include="game\drawing.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <Library Include="d3d9.lib" />
+    <ClInclude Include="main\fonts.hxx">
+      <Filter>main</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui\imgui_freetype.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="imgui">

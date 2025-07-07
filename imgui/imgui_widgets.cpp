@@ -1148,7 +1148,7 @@ bool ImGui::Checkbox(const char* label, bool* v)
     const ImGuiID id = window->GetID(label);
     const ImVec2 label_size = CalcTextSize(label, NULL, true);
 
-    const float square_sz = 10.f;
+    const float square_sz = 20.f;
     const ImVec2 pos = window->DC.CursorPos;
     const ImRect total_bb(pos, pos + ImVec2(square_sz + (label_size.x > 0.0f ? style.ItemInnerSpacing.x + label_size.x : 0.0f), label_size.y + style.FramePadding.y * 2.0f));
     const ImRect check_bb(pos, pos + ImVec2(square_sz, square_sz));
@@ -1165,25 +1165,36 @@ bool ImGui::Checkbox(const char* label, bool* v)
         MarkItemEdited(id);
     }
 
+    // Outline border
     PushStyleColor(ImGuiCol_Border, IM_COL32(25, 25, 25, 255));
     RenderFrame(check_bb.Min, check_bb.Max, GetColorU32(ImGuiCol_FrameBg), true, style.FrameRounding);
+
     if (*v)
     {
-        RenderFrame(check_bb.Min, check_bb.Max, GetColorU32(ImGuiCol_CheckMark), true, style.FrameRounding);
+        // Fill box with active color
+        RenderFrame(check_bb.Min, check_bb.Max, GetColorU32(ImGuiCol_FrameBgActive), true, style.FrameRounding);
+
+        // Draw checkmark on top
+        const ImU32 check_col = GetColorU32(ImGuiCol_CheckMark);
+        const float pad = ImMax(1.0f, square_sz / 6.0f);
+        RenderCheckMark(window->DrawList, check_bb.Min + ImVec2(pad, pad), check_col, square_sz - pad * 2.0f);
     }
+
     RenderFrameBorder(check_bb.Min, check_bb.Max, style.FrameRounding);
     PopStyleColor();
 
+    // Label text
     if (label_size.x > 0.0f)
     {
+        ImVec2 text_pos = ImVec2(check_bb.Max.x + style.ItemInnerSpacing.x, check_bb.Min.y + (square_sz / 2) - (label_size.y / 2));
         if (*v)
         {
-            RenderText(ImVec2(check_bb.Max.x + style.ItemInnerSpacing.x, check_bb.Min.y + (square_sz / 2) - (label_size.y / 2)), label);
+            RenderText(text_pos, label);
         }
         else
         {
             PushStyleColor(ImGuiCol_Text, IM_COL32(155, 155, 155, 255));
-            RenderText(ImVec2(check_bb.Max.x + style.ItemInnerSpacing.x, check_bb.Min.y + (square_sz / 2) - (label_size.y / 2)), label);
+            RenderText(text_pos, label);
             PopStyleColor();
         }
     }
@@ -1191,6 +1202,8 @@ bool ImGui::Checkbox(const char* label, bool* v)
     IMGUI_TEST_ENGINE_ITEM_INFO(id, label, window->DC.ItemFlags | ImGuiItemStatusFlags_Checkable | (*v ? ImGuiItemStatusFlags_Checked : 0));
     return pressed;
 }
+
+
 
 template<typename T>
 bool ImGui::CheckboxFlagsT(const char* label, T* flags, T flags_value)
